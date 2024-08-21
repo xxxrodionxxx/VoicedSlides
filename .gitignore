@@ -6,7 +6,6 @@ requirements_old.txt
 URL адрес откуда можно скачать модель.txt
 transmitter.py
 sql_data.py.pclprof
-sql_data.py
 /dictionaries/orphoepy.db
 /input/Консультация АДЦ утро 01.10 02.03.2024.pptx
 /input/ТЕКСТ для РДЦ утро 30.03.2024.docx
