@@ -6,6 +6,7 @@ from art import text2art
 
 
 def main():
+    # Начало измерения времени
     start_time = time.time()
     path_to_project = os.path.dirname(os.path.abspath(__file__)) + '\\'
     # Читаем конфигурационный файл
