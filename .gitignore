@@ -1,11 +1,14 @@
-/audio_file/
+/audio/audio_file/
 /picture/
 /output/
 .idea/
 requirements_old.txt
 URL адрес откуда можно скачать модель.txt
-transmitter.py
+text/text_transformation.py
+dictionaries/orthoepy.dic
 sql_data.py.pclprof
-/dictionaries/orphoepy.db
 /input/Консультация АДЦ утро 01.10 02.03.2024.pptx
 /input/ТЕКСТ для РДЦ утро 30.03.2024.docx
+/raspoznavanie_golosa_6w215b8r73yj.ico
+new.py
+/test_package

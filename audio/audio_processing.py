@@ -1,8 +1,8 @@
-from file_utils import rename_file
+from utils.file_utils import rename_file
 import torch
 import wave
 import os
-from file_utils import remove_file
+from utils.file_utils import remove_file
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -72,7 +72,7 @@ def serch_and_concatenate_wav(path_to_wav):
     for key, value in result_dict.items():
         for string in value:
             value_new.append(path_to_wav + '\\' + string)
-            output_file_path_new = f'audio_file\\{key}'
+            output_file_path_new = f'audio\\audio_file\\{key}'
         concatenate_wav_files(value_new, output_file_path_new)
         for path in value_new:
             remove_file(path)
@@ -96,7 +96,7 @@ def model_transform(ssml_sample, name, path_to_project):
                                      put_yo=put_yo)
 
         print(path_to_project)  # Rename the output file
-        rename_file(path_to_project, 'test.wav', f'audio_file\\{name}.wav')
+        rename_file(path_to_project, 'test.wav', f'audio\\audio_file\\{name}.wav')
 
         return audio_paths
 

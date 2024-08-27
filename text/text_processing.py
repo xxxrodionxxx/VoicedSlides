@@ -1,9 +1,7 @@
-import re
-import dictionaries_processing
 import textract
-from transmitter import *
-from line_profiler_pycharm import profile
 import sqlite3
+from dictionaries import load_dictionary, numbers_dict
+from .text_transformation import *
 
 
 def split_text(text, start, end):
@@ -16,7 +14,7 @@ def split_text(text, start, end):
     return text[start_index:end_index + len(end)]
 
 
-def transmitter_data(text, numbers_dict):
+def transmitter_data(text, my_numbers_dict):
     # Ищем две цифры перед и после обратного слэша
     matches = re.findall(r'(\d{2})(\d{2})/(\d{2})(\d{2})', text)
     found_t = text  # Исправлено: объявляем переменную перед циклом
@@ -26,7 +24,7 @@ def transmitter_data(text, numbers_dict):
         end_value = str(int(match[3]))
         start_value2 = ""  # Исправлено: объявляем как строку
         end_value2 = ""  # Исправлено: объявляем как строку
-        for key, value in numbers_dict.items():
+        for key, value in my_numbers_dict.items():
             if key == int(start_value):
                 start_value2 = value
             if key == int(end_value):
@@ -163,10 +161,10 @@ def separate_text(example_text):
 
 
 def process_text_list(text_list):
-    '''
+    """
     Если разделённый текст имеет больше 1000 знаков, то он делится на части,
     преобразование цифровых значений в слова
-    '''
+    """
     list_list = []
     name_list = []
 
@@ -227,7 +225,7 @@ def process_and_transform_text(list_list, my_dictionary):
     return processed_texts
 
 
-def process_text_3(input_text):
+def process_text_3(input_text: object) -> object:
     # Разбиваем текст на параграфы
     paragraphs = input_text.split('\n')
 
@@ -243,8 +241,11 @@ def process_text_3(input_text):
     return processed_text
 
 
+
 def main(file_path_docx):
-    my_dict_abbreviations_and_endings, my_dict_weather = dictionaries_processing.main()
+    # Загружаем словари
+    my_dict_abbreviations_and_endings = load_dictionary('./dictionaries/dict_abbreviations_and_endings.txt')
+    my_dict_weather = load_dictionary('./dictionaries/dict_weather.txt')
     # Читаем текст из .docx файла
     docx_text = textract.process(file_path_docx)
     text_consultations = docx_text.decode("utf-8")

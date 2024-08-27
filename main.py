@@ -1,7 +1,7 @@
-import text_processing
-import audio_processing
-from file_utils import *
-import video_processing
+from text import text_processing
+from audio import audio_processing
+from utils.file_utils import *
+from video import video_processing
 from art import text2art
 
 
@@ -14,9 +14,11 @@ def main():
     codec, scale_width, scale_height, num_threads, name_model = read_config('config.ini')
 
     # Проверка и создание папок
+    check_and_create_folder('input')
+    check_and_create_folder('picture')
     check_and_create_folder('output')
-    check_and_create_folder('audio_file')
-    clear_folder('audio_file')
+    check_and_create_folder('audio/audio_file')
+    clear_folder('audio/audio_file')
 
     # Конвертация PowerPoint в PNG изображения
     file_path_docx, file_path_pptx = find_docx_and_pptm_files('input')
@@ -33,10 +35,10 @@ def main():
     audio_paths = audio_processing.convert_texts_to_audio(processed_texts, name_list, path_to_project)
 
     # Объединение аудио-файлов
-    audio_processing.serch_and_concatenate_wav(path_to_project + 'audio_file\\')
+    audio_processing.serch_and_concatenate_wav(path_to_project + 'audio/audio_file')
 
     # Создаём видеофайл из картинок и аудио
-    video_processing.video_creation('picture', 'audio_file', file_path_pptx, codec)
+    video_processing.video_creation('picture', 'audio/audio_file', file_path_pptx, codec)
 
     # Вывод на экран времени затраченного на выполнение скрипта
     end_time = time.time()
