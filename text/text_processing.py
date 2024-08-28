@@ -241,6 +241,28 @@ def process_text_3(input_text: object) -> object:
     return processed_text
 
 
+def apply_stress_marks(text):
+    # Словарь с формами слова "сектор" и их ударениями
+    stress_dict = {
+        r"\bсектор\b": "с+ектор",
+        r"\bкроме сектора\b": "кроме сектор+а",
+        r"\bкроме  сектора\b": "кроме  сектор+а",
+        r"\bсектора\b": "с+ектора",
+        r"\bсекторе\b": "с+екторе",
+        r"\bсектору\b": "с+ектору",
+        r"\bсектором\b": "с+ектором",
+        r"\bсекторы\b": "сектор+ы",
+        r"\bсекторов\b": "сектор+ов",
+        r"\bсекторами\b": "сектор+ами",
+        r"\bсекторах\b": "сектор+ах"
+    }
+
+    # Проход по словарю и замена форм в тексте на формы с ударениями
+    for pattern, stressed_form in stress_dict.items():
+        text = re.sub(pattern, stressed_form, text, flags=re.IGNORECASE)
+
+    return text
+
 
 def main(file_path_docx):
     # Загружаем словари
@@ -249,6 +271,8 @@ def main(file_path_docx):
     # Читаем текст из .docx файла
     docx_text = textract.process(file_path_docx)
     text_consultations = docx_text.decode("utf-8")
+    # расставляем ударения в различных склонениях слова "сектор"
+    text_consultations = apply_stress_marks(text_consultations)
     # Разделяем текст на 3 части
     start_text = split_text(text_consultations, '<1>', 'Прогноз по аэродрому Толмачёво')
     end_text = split_text(text_consultations, '=', 'Дежурная смена к работе готова.')
