@@ -24,7 +24,7 @@ def video_creation(path_image: str, path_audio: str, file_path_pptx: str, codec:
 
     # Подготовка имени выходного файла
     output_filename = os.path.splitext(os.path.basename(file_path_pptx))[0] + '.mp4'
-    output_path = os.path.join('../output', output_filename)
+    output_path = os.path.join('./output', output_filename)
 
     # Определение количества ядер процессора
     num_threads = multiprocessing.cpu_count()
