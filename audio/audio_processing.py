@@ -85,8 +85,8 @@ def model_transform(ssml_sample, name, path_to_project):
         # Configuration settings
         sample_rate = 48000
         speaker = 'xenia'
-        put_accent = False
-        put_yo = False
+        put_accent = True
+        put_yo = True
 
         # Generate and save the audio
         audio_paths = model.save_wav(ssml_text=ssml_sample,
