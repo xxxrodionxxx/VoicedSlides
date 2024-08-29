@@ -7,7 +7,7 @@ def replace_text_with_dictionary(text, my_dict):
     sorted_keys = sorted(my_dict.keys(), key=len, reverse=True)
     for key in sorted_keys:
         value = my_dict[key]
-        pattern = re.compile(re.escape(key), re.IGNORECASE)
+        pattern = re.compile(re.escape(key) + r'(?!\w)', re.IGNORECASE)
         text = pattern.sub(value, text)
     return text
 
