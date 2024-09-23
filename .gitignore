@@ -5,8 +5,6 @@
 requirements_old.txt
 URL адрес откуда можно скачать модель.txt
 text/text_transformation.py
-dictionaries/orthoepy.dic
-dictionaries/orthoepy.db
 sql_data.py.pclprof
 /input/Консультация АДЦ утро 01.10 02.03.2024.pptx
 /input/ТЕКСТ для РДЦ утро 30.03.2024.docx
@@ -15,3 +13,9 @@ new.py
 /test_package
 /test.wav
 /Консультация АДЦ утро 01.10 02.03.2024TEMP_MPY_wvf_snd.mp4
+/test_gamet/modelV3.pt
+/test_gamet/audio/audio_file/audio0.wav
+/text/gamet.py.pclprof
+dictionaries/orphoepy.db
+dictionaries/orthoepy.dic
+/test_gamet/audio/
