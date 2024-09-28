@@ -1,0 +1,1 @@
+{"profiledFunctions": [{"file": "F:\\Program Files (x86)\\Projects\\VoicedSlides\\sql_data.py", "lineNo": 61, "functionName": "search_db", "profiledLines": []}, {"file": "F:\\Program Files (x86)\\Projects\\VoicedSlides\\sql_data.py", "lineNo": 113, "functionName": "map_serch_dict", "profiledLines": []}], "unit": 1e-07}
