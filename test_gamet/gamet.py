@@ -293,6 +293,44 @@ def remove_patterns(text):
     return text.strip()
 
 
+def remove_patterns_sigwx(text):
+    patterns = {
+        r'ISOL TS': 'отд+ельные гр+озы',
+        r'OCNL TS': 'р+едкие гр+озы',
+        r'FRQ TS': 'ч+астые гр+озы',
+        r'OBSC TS': 'в +облачности ',
+        r'EMBD TS': 'скр+ытые гр+озы',
+        r'ISOL TSGR': 'отд+ельные гр+озы с гр+адом',
+        r'OCNL TSGR': 'р+едкие  гр+озы с гр+адом',
+        r'FRQ TSGR': 'ч+астые  гр+озы с гр+адом',
+        r'OBSC TSGR': 'в +облачности гр+озы с гр+адом',
+        r'EMBD TSGR': 'скр+ытые гр+озы с гр+адом',
+    }
+
+    for pattern, replacement in patterns.items():
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+    return text.strip()
+
+
+def remove_patters_sig_cld(text):
+    patterns = {
+        r'ISOL CB': 'отде+льная CB',
+        r'OCNL CB': 'р+едкая CB',
+        r'FRQ CB': 'ч+астая CB',
+        r'OBSC CB': 'в +облачности CB',
+        r'EMBD CB': 'скр+ытая CB',
+        r'ISOL TCU': 'отд+ельная TCU',
+        r'OCNL TCU': 'р+едкая TCU',
+        r'FRQ TCU': 'ч+астая TCU',
+        r'OBSC TCU': 'в +облачности TCU',
+        r'EMBD TCU': 'скр+ытая TCU',
+    }
+
+    for pattern, replacement in patterns.items():
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+    return text.strip()
 
 # def replacement_area(text):
 #     matches = re.finditer(r"AREA.*$", text, flags=re.MULTILINE)
@@ -677,8 +715,7 @@ if __name__ == '__main__':
 
     # расшифровка 'SIGWX:'
     if 'SIGWX:' in text_gamet:
-        text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('TS', 'гр+озы')
-        text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('TSGR', 'гр+озы с гр+адом')
+        text_gamet['SIGWX:'] = remove_patterns_sigwx(text_gamet['SIGWX:'])
         text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('HVY', 'с+ильные')
         text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('SS', 'песч+аные б+ури')
         text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('DS', 'п+ыльные б+ури')
@@ -687,6 +724,7 @@ if __name__ == '__main__':
 
     # расшифровка 'SIG CLD:'
     if 'SIG CLD:' in text_gamet:
+        text_gamet['SIG CLD:'] = remove_patters_sig_cld(text_gamet['SIG CLD:'])
         text_gamet['SIG CLD:'] = cloud(text_gamet['SIG CLD:'])
         text_gamet['SIG CLD:'] = cloud2(text_gamet['SIG CLD:'])
         text_gamet['SIG CLD:'] = transmitter_hour(text_gamet['SIG CLD:'], numbers_dict)
