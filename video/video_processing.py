@@ -36,7 +36,7 @@ def video_creation(path_image: str, path_audio: str, file_path_pptx: str, codec:
         audio_codec='aac',
         fps=24,
         threads=num_threads,  # Используем все доступные ядра
-        # preset='medium',  # Баланс между скоростью и качеством
+        preset='medium',  # Баланс между скоростью и качеством
         # bitrate='5000k',  # Установите подходящий битрейт
         # audio_bitrate='192k'
     )

@@ -59,36 +59,28 @@ def load_dictionary(file_path):
         return None
 
 
-def process_and_replace(text, start, end, my_numbers_dict):
-    # Находим подстроку между start и end
-    match = re.search(f'{re.escape(start)}(.*?){re.escape(end)}', text)
-    if match:
-        # Извлекаем текст между start и end
-        found_text = match.group(1)
-        # Ищем две цифры перед и после обратного слэша
-        matches = re.findall(r'(\d{2})(\d{2})/(\d{2})(\d{2})', found_text)
-        found_t = found_text  # Исправлено: объявляем переменную перед циклом
-        for match in matches:
-            # Преобразуем найденные значения в нужный формат
-            start_value = str(int(match[1]))  # Убираем 0 перед числом
-            end_value = str(int(match[3]))
-            start_value2 = ""  # Исправлено: объявляем как строку
-            end_value2 = ""  # Исправлено: объявляем как строку
-            for key, value in my_numbers_dict.items():
-                if key == int(start_value):
-                    start_value2 = value
-                if key == int(end_value):
-                    end_value2 = value
-            replacement = f'с {start_value2} до {end_value2} Z'
+def process_and_replace(text, my_numbers_dict):
+    found_text = text
+    # Ищем две цифры перед и после обратного слэша
+    matches = re.findall(r'(\d{2})(\d{2})/(\d{2})(\d{2})', found_text)
+    found_t = found_text  # Исправлено: объявляем переменную перед циклом
+    for match in matches:
+        # Преобразуем найденные значения в нужный формат
+        start_value = str(int(match[1]))  # Убираем 0 перед числом
+        end_value = str(int(match[3]))
+        start_value2 = ""  # Исправлено: объявляем как строку
+        end_value2 = ""  # Исправлено: объявляем как строку
+        for key, value in my_numbers_dict.items():
+            if key == int(start_value):
+                start_value2 = value
+            if key == int(end_value):
+                end_value2 = value
+        replacement = f'с {start_value2} до {end_value2} Z'
 
-            # Заменяем найденную подстроку в тексте
-            old_substring = match[0] + match[1] + "/" + match[2] + match[3]
-            found_t = found_t.replace(old_substring, replacement)
-        return found_t
-
-    else:
-        print(f'Не найден текст: {start}')
-        return None
+        # Заменяем найденную подстроку в тексте
+        old_substring = match[0] + match[1] + "/" + match[2] + match[3]
+        found_t = found_t.replace(old_substring, replacement)
+    return found_t
 
 
 def process_and_replace2(text, my_numbers_dict):
@@ -359,12 +351,13 @@ def cloud3(text):
 
 
 def transmitter_taf(text):
-
-    start = 'Прогноз по аэродрому Толмачёво'
-    end = '='
+    text = text.replace('!TAF_START!', '')
+    text = text.replace('!TAF_END!', '')
+    text = text.replace('\n', '')
     my_dict = load_dictionary(r'./dictionaries/dict_weather.txt')
 
-    start_text_end = process_and_replace(text, start, end, numbers_dict)
+    start_text_end = process_and_replace(text, numbers_dict)
+
     result = replace_storm(cloud3(cloud2(cloud(visibility(
         replace_from(replace_temp2(replace_temp(process_and_replace_wind_data3(process_and_replace_wind_data2(
             process_and_replace_wind_data(start_text_end))), numbers_dict_date,
