@@ -1,6 +1,7 @@
 import textract
 import sqlite3
 from dictionaries import load_dictionary, numbers_dict
+from .gamet import process_gamet_text
 from .text_transformation import *
 
 
@@ -96,11 +97,27 @@ def remove_patterns_cloud(text):
     return text.strip()
 
 
+def remove_tags(text):
+    patterns = {
+        r'!TAF_START!': '',
+        r'!TAF_END!': '',
+        r'!START!': '',
+        r'!END!': '',
+        r'!GAMET_START!': '',
+        r'!GAMET_END!': ''
+    }
+
+    for pattern, replacement in patterns.items():
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+    return text
+
+
 def concatenate_texts(*texts):
     concatenated_text = ""
     for text in texts:
         concatenated_text += text
-    return concatenated_text
+    return remove_tags(concatenated_text)
 
 
 def split_text_by_tags(text):
@@ -226,19 +243,22 @@ def process_and_transform_text(list_list, my_dictionary):
 
 
 def process_text_3(input_text: object) -> object:
-    # Разбиваем текст на параграфы
-    paragraphs = input_text.split('\n')
+    if input_text is not None:
+        # Разбиваем текст на параграфы
+        paragraphs = input_text.split('\n')
 
-    # Добавляем теги к каждому параграфу
-    processed_paragraphs = ['<p>' + paragraph + '</p>' for paragraph in paragraphs]
+        # Добавляем теги к каждому параграфу
+        processed_paragraphs = ['<p>' + paragraph + '</p>' for paragraph in paragraphs]
 
-    # Собираем обработанные параграфы обратно в текст
-    processed_text = '\n'.join(processed_paragraphs)
+        # Собираем обработанные параграфы обратно в текст
+        processed_text = '\n'.join(processed_paragraphs)
 
-    # Добавляем теги speak в начало и конец текста
-    processed_text = '<speak>' + processed_text + '</speak>'
+        # Добавляем теги speak в начало и конец текста
+        processed_text = '<speak>' + processed_text + '</speak>'
 
-    return processed_text
+        return processed_text
+    else:
+        raise Exception('!!!!')
 
 
 def apply_stress_marks(text):
@@ -264,8 +284,38 @@ def apply_stress_marks(text):
     return text
 
 
-def main(file_path_docx):
+def manipulate_text(text, start_marker: str, end_marker: str, function):
+
+    start_index = text.find(start_marker)
+    end_index = text.find(end_marker)
+
+    if start_index == -1 or end_index == -1 or start_index >= end_index:
+        # Если маркеры не найдены или расположены неправильно, возвращаем исходный текст
+        return text
+
+    # Индексы начала и конца содержимого между маркерами
+    content_start = start_index + len(start_marker)
+    content_end = end_index
+
+    # Извлекаем текст между маркерами
+    content = text[content_start:content_end]
+
+    # Здесь проводим необходимые манипуляции с контентом
+    manipulated_content = function(content)  # Пример: переводим в верхний регистр
+
+    # Собираем новый текст
+    new_text = (
+            text[:content_start] +
+            manipulated_content +
+            text[content_end:]
+    )
+
+    return new_text
+
+
+def main(file_path_docx, flag_gamet=False):
     # Загружаем словари
+    # flag_gamet = True
     my_dict_abbreviations_and_endings = load_dictionary('./dictionaries/dict_abbreviations_and_endings.txt')
     my_dict_weather = load_dictionary('./dictionaries/dict_weather.txt')
     # Читаем текст из .docx файла
@@ -273,24 +323,46 @@ def main(file_path_docx):
     text_consultations = docx_text.decode("utf-8")
     # расставляем ударения в различных склонениях слова "сектор"
     text_consultations = apply_stress_marks(text_consultations)
-    # Разделяем текст на 3 части
-    start_text = split_text(text_consultations, '<1>', 'Прогноз по аэродрому Толмачёво')
-    end_text = split_text(text_consultations, '=', 'Дежурная смена к работе готова.')
-    taf_text = split_text(text_consultations, 'Прогноз по аэродрому Толмачёво', '=')
-    # Преобразуем текст в формат TAF в текст
-    taf_text_new = transmitter_taf(taf_text)
-    # Обрабатываем текст до 'Прогноз по аэродрому Толмачёво'
-    processed_visibility = visibility_new(start_text)
-    replaced_from_visibility = replace_from_visibility(processed_visibility)
-    cloud_data = cloud(replace_from(replaced_from_visibility, numbers_dict))
-    cloud2_data = cloud2(cloud_data)
-    cloud3_data = cloud3(cloud2_data)
-    wind_data = wind(cloud3_data)
-    result_1 = transmitter_data(wind_data, numbers_dict)
+    # Разделяем текст на части
+    if not flag_gamet:
+        start_text = split_text(text_consultations, '!START!', '!TAF_START!')
+        end_text = split_text(text_consultations, '!TAF_END!', '!END!')
+        taf_text = split_text(text_consultations, '!TAF_START!', '!TAF_END!')
+        # Преобразуем текст в формат TAF в текст
+        taf_text_new = transmitter_taf(taf_text)
+        # Обрабатываем текст до 'Прогноз по аэродрому Толмачёво'
+        processed_visibility = visibility_new(start_text)
+        replaced_from_visibility = replace_from_visibility(processed_visibility)
+        cloud_data = cloud(replace_from(replaced_from_visibility, numbers_dict))
+        cloud2_data = cloud2(cloud_data)
+        cloud3_data = cloud3(cloud2_data)
+        wind_data = wind(cloud3_data)
+        result_1 = transmitter_data(wind_data, numbers_dict)
 
-    result_2 = wind_zero(remove_patterns_cloud(end_text))
+        result_2 = wind_zero(remove_patterns_cloud(end_text))
 
-    text_consultations_new = concatenate_texts(result_1, taf_text_new, result_2)
+        text_consultations_new = concatenate_texts(result_1, taf_text_new, result_2)
+    else:
+        start_text = split_text(text_consultations, '!START!', '!GAMET_ONE_START!')
+        end_text = split_text(text_consultations, '!TAF_END!', '!END!')
+        print(end_text)
+        taf_and_gamet_text = split_text(text_consultations, '!GAMET_ONE_START!', '!TAF_END!')
+        # Преобразуем текст в формат TAF в текст
+        taf_and_gamet_text = manipulate_text(taf_and_gamet_text, '!TAF_START!', '!TAF_END!', transmitter_taf)
+        taf_and_gamet_text = manipulate_text(taf_and_gamet_text, '!GAMET_ONE_START!', '!GAMET_ONE_END!', process_gamet_text)
+        taf_and_gamet_text = manipulate_text(taf_and_gamet_text, '!GAMET_TWO_START!', '!GAMET_TWO_END!', process_gamet_text)
+        # Обрабатываем текст до 'Прогноз по аэродрому Толмачёво'
+        start_text = visibility_new(start_text)
+        start_text = replace_from_visibility(start_text)
+        start_text = cloud(replace_from(start_text, numbers_dict))
+        start_text = cloud2(start_text)
+        start_text = cloud3(start_text)
+        start_text = wind(start_text)
+        start_text = transmitter_data(start_text, numbers_dict)
+
+        end_text = wind_zero(remove_patterns_cloud(end_text))
+
+        text_consultations_new = concatenate_texts(start_text, taf_and_gamet_text, end_text)
 
     text_consultations_new_2 = replace_text_with_dictionary(replace_text_with_dictionary(
         text_consultations_new, my_dict_abbreviations_and_endings), my_dict_weather)

@@ -1,34 +1,7 @@
-import os
-import re
-
-import torch
-
-import utils
-from audio.audio_processing import model_transform, convert_texts_to_audio
 from dictionaries import numbers_dict
-from sql_data import replace_words_in_text_in_db
-from text import process_and_transform_text, process_text_3, process_text_list
-from text import replace_digits_with_words, replace_text_with_dictionary, load_dictionary
-
+from .text_transformation import replace_digits_with_words, replace_text_with_dictionary, load_dictionary
+# from text import replace_digits_with_words, replace_text_with_dictionary, load_dictionary
 import re
-
-
-# def transform_area(text):
-#     def replace_area(match):
-#         area = match.group(1)
-#         parts = area.split('-')
-#         if len(parts) == 1:
-#             items = re.findall(r'(\d+|\D+)', parts[0])
-#             return 'по площадям ' + ' '.join(item.strip() + '.' for item in items if item.strip())
-#         else:
-#             start = re.findall(r'(\d+|\D+)', parts[0])
-#             end = re.findall(r'(\d+|\D+)', parts[1])
-#             return f"по площадям с {' '.join(item.strip() + '.' for item in start if item.strip())} по {' '.join(item.strip() + '.' for item in end if item.strip())}"
-#
-#     # Обновленный паттерн для поиска AREA
-#     pattern = r'\bAREA\s+([\w\s-]+?)(?=\s+(?:AREA|[A-Z]{2,}|\d{2}/\d{2}|\d{4}/\d{2}|FL\d{3}|$))'
-#
-#     return re.sub(pattern, replace_area, text)
 
 
 def num_to_word(num, is_after_po=False):
@@ -272,6 +245,7 @@ def remove_patterns(text):
         r'UNNT GAMET COR VALID': 'Исправл+ение к прогн+озу Гамет ',
         r'UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100*': 'по площад+ям с п+ервой Аа Бэ, по дев+ятую ЦэПэ+И Т+омск, н+иже эшел+она ст+о',
         r'SECN I': 'раздел од+ин',
+        r'SECN 1': 'раздел од+ин',
         r'HAZARDOUS WX NIL': 'оп+асные явл+ения пог+оды отс+утствуют',
         r'USTV TYUMEN FIR/NIZHNEVARTOVSK 1-11 BLW FL100*': 'по площад+ям с п+ервой по од+иннадцатую ЦэПэ+И Нижнев+артовск, н+иже эшелона ст+о',
         r'USTV GAMET VALID': 'Прогн+оз Гам+ет',
@@ -332,16 +306,6 @@ def remove_patters_sig_cld(text):
 
     return text.strip()
 
-# def replacement_area(text):
-#     matches = re.finditer(r"AREA.*$", text, flags=re.MULTILINE)
-#     for match in matches:
-#         found_text = match.group(0)
-#         print(found_text)
-#         # Здесь можно модифицировать найденную строку
-#         replacement = 'по площадям'
-#         text = text.replace(found_text, replacement)
-#     return text
-
 
 def transmitter_data(text, my_numbers_dict):
     # Ищем две цифры перед и после обратного слэша
@@ -393,7 +357,7 @@ def transmitter_hour_minute(text, my_numbers_dict):
 
 def transmitter_hour(text, my_numbers_dict):
     # Ищем две цифры перед и после обратного слэша
-    matches = re.findall(r'(\d{2})/(\d{2})', text)
+    matches = re.findall(r'(\d{2})/(\d{2}) ', text)
     found_t = text  # Исправлено: объявляем переменную перед циклом
     for match in matches:
         # Преобразуем найденные значения в нужный формат
@@ -450,12 +414,6 @@ def split_text_by_keywords(text, keywords):
             result[current_key] += section + ' '
 
     return result
-    # # Восстанавливаем весь текст с сохранением порядка и структуры
-    # final_text = ''
-    # for key, value in result.items():
-    #     final_text += f"{key}\n{value.strip()}\n"
-    #
-    # return final_text.strip()
 
 
 # Полный словарь для замены погодных явлений с учетом усилителей
@@ -468,8 +426,8 @@ weather_phrases_re = {
     r"HVY DU": "сильная пыль",
     r"FBL DZ": "слабая морось",
     r"HVY DZ": "сильная морось",
-    r"FBL FG": "слабый тум+ан",
-    r"HVY FG": "сильный тум+ан",
+    r"FBL FG": "слабый туман",
+    r"HVY FG": "сильный туман",
     r"FBL FU": "слабый дым",
     r"HVY FU": "сильный дым",
     r"FBL HZ": "слабая мгла",
@@ -482,8 +440,8 @@ weather_phrases_re = {
     r"HVY SG": "сильные снежные зерна",
     r"FBL SN": "слабый снег",
     r"HVY SN": "сильный снег",
-    r"FBL FZFG": "слабый переохлажденный тум+ан",
-    r"HVY FZFG": "сильный переохлажденный тум+ан",
+    r"FBL FZFG": "слабый переохлажденный туман",
+    r"HVY FZFG": "сильный переохлажденный туман",
     r"FBL FZDZ": "слабая переохлажденная морось",
     r"HVY FZDZ": "сильная переохлажденная морось",
     r"FBL FZRA": "слабый переохлажденный дождь",
@@ -504,14 +462,14 @@ weather_phrases_re = {
     r"DS": "пыльная буря",
     r"DU": "пыль",
     r"DZ": "морось",
-    r"FG": "тум+ан",
+    r"FG": "туман",
     r"FU": "дым",
     r"HZ": "мгла",
     r"RA": "дождь",
     r"SA": "песчаная буря",
     r"SG": "снежные зерна",
     r"SN": "снег",
-    r"FZFG": "переохлажденный тум+ан",
+    r"FZFG": "переохлажденный туман",
     r"FZDZ": "переохлажденная морось",
     r"FZRA": "переохлажденный дождь",
     r"SHRA": "ливневый дождь",
@@ -531,253 +489,93 @@ def translate_weather_code_with_re(weather_string):
     return weather_string
 
 
-if __name__ == '__main__':
-    text_gamet3 = """
-    UNNT GAMET AMD VALID 021800/022400 UNTT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100
-    SECN I
-    SFC WIND: LCA VRB15MPS 250/07G15MPS SQ AREA 1AB 2 3A
-    SFC VIS: 4000 M FBL SHRA AREA 1AB-4A
-    LCA 1000 M SHSN AREA 1AB-3AB
-    2100/24 LCA 0500 M FZFG FU VAL VILLAGES AREA 4B-9
-    SIGWX: TS
-    SIG CLD: BKN 200/500 M AGL AREA 1AB-4A
-    LCA BKN 100/300 M AGL AREA 1AB 2
-    OCNL CB 600/2500 M AGL
-    ISOL CB 1400/XXX M AMSL AREA 14AB
-    00/02 BKN 1000/1400 M AMSL AREA 14AB
-    ICE: MOD INC AND PRECIPITATION AREA 1AB-3AB
-    MOD INC AREA 4B-9
-    MOD FL050/200 AREA 4B-9
-    TURB: MOD SFC/FL050
-    SIGMET APPLICABLE: WS 1
-    """
-    text_gamet_ = """
-    UNNT GAMET VALID 120000/120600 UNNT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150
-    SECN I
-    SFC WIND: LCA VRB15MPS SQ AREA 1AB 2 3A
-    SFC VIS: 00/02 LCA 0800 M FG VAL
-    SIGWX: TS
-    MT OBSC: 00/02 AREA 14AB
-    SIG CLD: ISOL CB 600/XXX M AGL AREA 10-13
-    ISOL CB 1400/XXX M AMSL AREA 14AB
-    00/02 BKN 1000/1400 M AMSL AREA 14AB
-    ICE: MOD INC AND PRECIPITATION AREA 11 12
-    TURB: MOD FL020/150
-    SIGMET APPLICABLE: WS 1
-    """
-    text_gamet4 = """
-    USTV GAMET VALID 030600/031200 USNN-
-    USTV TYUMEN FIR/NIZHNEVARTOVSK 1-11 BLW FL100
-    SECN I
-    SFC VIS: 4000 M FBL SHRA BR
-    LCA 1000 M SHRA BR
-    SIG CLD: BKN 150/400 M AGL OCNL CB 450/3000 M AGL 
-    LCA BKN 060/150 M AGL VAL RIVERS
-    TURB: MOD SFC/FL100
-    """
-    text_gamet5 = """
-    USTV GAMET VALID 010600/011200 USNN-
-    USTV TYUMEN FIR/NIZHNEVARTOVSK 1-11 BLW FL100
-    SECN I
-    SFC VIS: LCA 3000 M FBL SHRA
-    SIG CLD: OCNL CB 600/XXX M AGL
-    LCA BKN 200/400 M AGL VAL RIVERS
-    TURB: MOD SFC/FL100
-    """
-    text_gamet6 = """
-    USTV GAMET VALID 180600/181200 USNN-
-    USTV TYUMEN FIR/NIZHNEVARTOVSK 1-11 BLW FL100
-    SECN I
-    SFC VIS: LCA 3000 M FBL SHRA
-    SIGWX: OCNL TS
-    SIG CLD: OCNL CB 500/XXX M AGL 
-    LCA BKN 150/400 M AGL VAL
-    TURB: MOD SFC/FL100
-    SIGMET APPLICABLE: WS 2
-    """
-    text_gamet7 = """
-    UNNT GAMET VALID 181200/181800 UNNT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150
-    SECN I
-    SFC VIS: 15/18 LCA 0500 M FG VAL
-    SIG CLD: ISOL CB 900/XXX M AGL AREA 10-13
-    ISOL CB 1500/XXX M AMSL AREA 14AB
-    """
-    text_gamet8 = """
-    UNNT GAMET VALID 180600/181200 UNNT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150
-    SECN I
-    SIG CLD: ISOL CB 900/XXX M AGL AREA 10-13
-    ISOL CB 1500/XXX M AMSL AREA 14AB
-    """
-    text_gamet9 = """
-    UNNT GAMET VALID 171200/171800 UNNT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150
-    SECN I
-    SIG CLD: ISOL CB 900/XXX M AGL AREA 10-13
-    ISOL CB 1500/XXX M AMSL AREA 14AB
-    TURB: MOD FL100/150
-    """
-    text_gamet10 = """
-    UNNT GAMET COR VALID 170600/171200 UNNT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150
-    SECN I
-    SIG CLD: ISOL CB 900/XXX M AGL AREA 10-13
-    ISOL CB 1500/XXX M AMSL AREA 14AB
-    ICE: MOD INC AREA 14AB
-    """
-    text_gamet11 = """
-    UNNT GAMET VALID 170600/171200 UNNT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150
-    SECN I
-    SIG CLD: ISOL CB 900/XXX M AGL AREA 10-13
-    ISOL CB 1500/XXX M AMSL AREA 14AB
-    ICE: MOD INC AREA 14AB
-    """
-    text_gamet12 = """
-    UNNT GAMET VALID 161200/161800 UNNT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150
-    SECN I
-    SFC VIS: LCA 1500 M BR VAL
-    MT OBSC: AREA 14AB
-    SIG CLD: OCNL CB 600/XXX M AGL AREA 10-13
-    BKN 1000/1400 M AMSL OCNL CB 1400/XXX M AMSL AREA 14AB
-    ICE: MOD INC AREA 14AB
-    TURB: MOD SFC/FL150
-    """
-    text_gamet13 = """
-    UNNT GAMET VALID 160600/161200 UNTT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100
-    SECN I
-    SIG CLD: ISOL CB 600/3000 M AGL
-    """
-    text_gamet14 = """
-    UNNT GAMET VALID 181200/181800 UNTT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100
-    SECN I
-    SFC VIS: LCA 2000 M SHRA AREA 1AB-4A
-    15/18 LCA 0500 M FG VAL RIVERS
-    SIGWX: ISOL TS AREA 1A
-    SIG CLD: OCNL CB 600/3000 M AGL
-    """
-    text_gamet15 = """
-    UNNT GAMET VALID 181200/181800 UNTT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100
-    SECN I
-    SFC VIS: LCA 2000 M SHRA AREA 1AB-4A
-    15/18 LCA 0500 M FG VAL RIVERS
-    SIGWX: ISOL TS AREA 1A
-    SIG CLD: OCNL CB 600/3000 M AGL
-    """
-    text_gamet = """
-    UNNT GAMET VALID 180600/181200 UNTT-
-    UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100
-    SECN I
-    SFC VIS: LCA 3000 M FBL SHRA AREA 1AB-7AB
-    SIGWX: ISOL TS AREA 1A
-    SIG CLD: OCNL CB 600/3000 M AGL
-    """
-    my_dict_abbreviations_and_endings = load_dictionary('../dictionaries/dict_abbreviations_and_endings.txt')
-    my_dict_weather = load_dictionary('../dictionaries/dict_weather.txt')
+def process_gamet_text(text_gamet: str) -> str:
+    if text_gamet is not None:
+        my_dict_abbreviations_and_endings = load_dictionary('./dictionaries/dict_abbreviations_and_endings.txt')
+        my_dict_weather = load_dictionary('./dictionaries/dict_weather.txt')
 
-    text_gamet = transform_area(text_gamet)
-    text_gamet = remove_patterns(text_gamet)
-    text_gamet = transmitter_data(text_gamet, numbers_dict)
-    # print(text_gamet)
+        text_gamet = transform_area(text_gamet)
+        text_gamet = remove_patterns(text_gamet)
+        text_gamet = transmitter_data(text_gamet, numbers_dict)
+        # print(text_gamet)
 
-    text_gamet = split_text_by_keywords(text_gamet, keywords)
-    if 'START' in text_gamet:
-        text_gamet['START'] = remove_patterns(text_gamet['START'])
-        text_gamet['START'] = transmitter_data(text_gamet['START'], numbers_dict)
-        text_gamet['START'] = text_gamet['START'].replace('-', '')
+        text_gamet = split_text_by_keywords(text_gamet, keywords)
+        if 'START' in text_gamet:
+            text_gamet['START'] = remove_patterns(text_gamet['START'])
+            text_gamet['START'] = transmitter_data(text_gamet['START'], numbers_dict)
+            text_gamet['START'] = text_gamet['START'].replace('-', '')
 
-    # расшифровка 'SFC WIND:'
-    if 'SFC WIND:' in text_gamet:
-        text_gamet['SFC WIND:'] = replace_wind_vrb(text_gamet['SFC WIND:'])
-        text_gamet['SFC WIND:'] = transmitter_hour(text_gamet['SFC WIND:'], numbers_dict)
-        text_gamet['SFC WIND:'] = transmitter_hour_minute(text_gamet['SFC WIND:'], numbers_dict)
-        text_gamet['SFC WIND:'] = replace_wind_vrb(text_gamet['SFC WIND:'])
-        text_gamet['SFC WIND:'] = replace_wind_with_impulses(text_gamet['SFC WIND:'])
-        text_gamet['SFC WIND:'] = replace_wind_without_impulses(text_gamet['SFC WIND:'])
-        text_gamet['SFC WIND:'] = 'Приз+емный в+етер: ' + text_gamet['SFC WIND:']
+        # расшифровка 'SFC WIND:'
+        if 'SFC WIND:' in text_gamet:
+            text_gamet['SFC WIND:'] = replace_wind_vrb(text_gamet['SFC WIND:'])
+            text_gamet['SFC WIND:'] = transmitter_hour(text_gamet['SFC WIND:'], numbers_dict)
+            text_gamet['SFC WIND:'] = transmitter_hour_minute(text_gamet['SFC WIND:'], numbers_dict)
+            text_gamet['SFC WIND:'] = replace_wind_vrb(text_gamet['SFC WIND:'])
+            text_gamet['SFC WIND:'] = replace_wind_with_impulses(text_gamet['SFC WIND:'])
+            text_gamet['SFC WIND:'] = replace_wind_without_impulses(text_gamet['SFC WIND:'])
+            text_gamet['SFC WIND:'] = 'Приз+емный в+етер: ' + text_gamet['SFC WIND:']
 
-    # расшифровка 'SFC VIS:'
-    if 'SFC VIS:' in text_gamet:
-        text_gamet['SFC VIS:'] = transform_area(text_gamet['SFC VIS:'])
-        text_gamet['SFC VIS:'] = translate_weather_code_with_re(text_gamet['SFC VIS:'])
-        text_gamet['SFC VIS:'] = visibility_sigmet(text_gamet['SFC VIS:'])
-        text_gamet['SFC VIS:'] = transmitter_hour(text_gamet['SFC VIS:'], numbers_dict)
-        text_gamet['SFC VIS:'] = transmitter_hour_minute(text_gamet['SFC VIS:'], numbers_dict)
-        text_gamet['SFC VIS:'] = 'В+идимость у пов+ерхности земл+и: ' + text_gamet['SFC VIS:']
+        # расшифровка 'SFC VIS:'
+        if 'SFC VIS:' in text_gamet:
+            text_gamet['SFC VIS:'] = transform_area(text_gamet['SFC VIS:'])
+            text_gamet['SFC VIS:'] = translate_weather_code_with_re(text_gamet['SFC VIS:'])
+            text_gamet['SFC VIS:'] = visibility_sigmet(text_gamet['SFC VIS:'])
+            text_gamet['SFC VIS:'] = transmitter_hour(text_gamet['SFC VIS:'], numbers_dict)
+            text_gamet['SFC VIS:'] = transmitter_hour_minute(text_gamet['SFC VIS:'], numbers_dict)
+            text_gamet['SFC VIS:'] = 'В+идимость у пов+ерхности земл+и: ' + text_gamet['SFC VIS:']
 
 
-    # расшифровка 'SIGWX:'
-    if 'SIGWX:' in text_gamet:
-        text_gamet['SIGWX:'] = remove_patterns_sigwx(text_gamet['SIGWX:'])
-        text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('HVY', 'с+ильные')
-        text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('SS', 'песч+аные б+ури')
-        text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('DS', 'п+ыльные б+ури')
-        text_gamet['SIGWX:'] = 'Ос+обые явл+ения пог+оды: ' + text_gamet['SIGWX:']
-    # print(text_gamet['SIGWX:'])
+        # расшифровка 'SIGWX:'
+        if 'SIGWX:' in text_gamet:
+            text_gamet['SIGWX:'] = remove_patterns_sigwx(text_gamet['SIGWX:'])
+            text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('HVY', 'с+ильные')
+            text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('SS', 'песч+аные б+ури')
+            text_gamet['SIGWX:'] = text_gamet['SIGWX:'].replace('DS', 'п+ыльные б+ури')
+            text_gamet['SIGWX:'] = 'Ос+обые явл+ения пог+оды: ' + text_gamet['SIGWX:']
+        # print(text_gamet['SIGWX:'])
 
-    # расшифровка 'SIG CLD:'
-    if 'SIG CLD:' in text_gamet:
-        text_gamet['SIG CLD:'] = remove_patters_sig_cld(text_gamet['SIG CLD:'])
-        text_gamet['SIG CLD:'] = cloud(text_gamet['SIG CLD:'])
-        text_gamet['SIG CLD:'] = cloud2(text_gamet['SIG CLD:'])
-        text_gamet['SIG CLD:'] = transmitter_hour(text_gamet['SIG CLD:'], numbers_dict)
-        text_gamet['SIG CLD:'] = transmitter_hour_minute(text_gamet['SIG CLD:'], numbers_dict)
-        text_gamet['SIG CLD:'] = '+Облачность: ' + text_gamet['SIG CLD:']
+        # расшифровка 'SIG CLD:'
+        if 'SIG CLD:' in text_gamet:
+            text_gamet['SIG CLD:'] = remove_patters_sig_cld(text_gamet['SIG CLD:'])
+            text_gamet['SIG CLD:'] = cloud(text_gamet['SIG CLD:'])
+            text_gamet['SIG CLD:'] = cloud2(text_gamet['SIG CLD:'])
+            text_gamet['SIG CLD:'] = transmitter_hour(text_gamet['SIG CLD:'], numbers_dict)
+            text_gamet['SIG CLD:'] = transmitter_hour_minute(text_gamet['SIG CLD:'], numbers_dict)
+            text_gamet['SIG CLD:'] = '+Облачность: ' + text_gamet['SIG CLD:']
 
-    # расшифровка 'ICE:'
-    if 'ICE:' in text_gamet:
-        text_gamet['ICE:'] = transmitter_hour(text_gamet['ICE:'], numbers_dict)
-        text_gamet['ICE:'] = replace_fl(text_gamet['ICE:'])
-        text_gamet['ICE:'] = text_gamet['ICE:'].replace('MOD', 'ум+еренное')
-        text_gamet['ICE:'] = text_gamet['ICE:'].replace('SEV', 'с+ильное')
-        text_gamet['ICE:'] = 'Обледен+ение: ' + text_gamet['ICE:']
+        # расшифровка 'ICE:'
+        if 'ICE:' in text_gamet:
+            text_gamet['ICE:'] = transmitter_hour(text_gamet['ICE:'], numbers_dict)
+            text_gamet['ICE:'] = replace_fl(text_gamet['ICE:'])
+            text_gamet['ICE:'] = text_gamet['ICE:'].replace('MOD', 'ум+еренное')
+            text_gamet['ICE:'] = text_gamet['ICE:'].replace('SEV', 'с+ильное')
+            text_gamet['ICE:'] = 'Обледен+ение: ' + text_gamet['ICE:']
 
-    # расшифровка 'TURB:'
-    if 'TURB:' in text_gamet:
-        text_gamet['TURB:'] = replace_fl(text_gamet['TURB:'])
-        text_gamet['TURB:'] = text_gamet['TURB:'].replace('MOD', 'ум+еренная')
-        text_gamet['TURB:'] = text_gamet['TURB:'].replace('SEV', 'с+ильная')
-        text_gamet['TURB:'] = 'Турбул+ентность: ' + text_gamet['TURB:']
+        # расшифровка 'TURB:'
+        if 'TURB:' in text_gamet:
+            text_gamet['TURB:'] = replace_fl(text_gamet['TURB:'])
+            text_gamet['TURB:'] = text_gamet['TURB:'].replace('MOD', 'ум+еренная')
+            text_gamet['TURB:'] = text_gamet['TURB:'].replace('SEV', 'с+ильная')
+            text_gamet['TURB:'] = 'Турбул+ентность: ' + text_gamet['TURB:']
 
-    # расшифровка 'SIGMET APPLICABLE:'
-    if 'SIGMET APPLICABLE:' in text_gamet:
-        text_gamet['SIGMET APPLICABLE:'] = replace_ws(text_gamet['SIGMET APPLICABLE:'])
+        # расшифровка 'SIGMET APPLICABLE:'
+        if 'SIGMET APPLICABLE:' in text_gamet:
+            text_gamet['SIGMET APPLICABLE:'] = replace_ws(text_gamet['SIGMET APPLICABLE:'])
 
-    # расшифровка 'MT OBSC:'
-    if 'MT OBSC:' in text_gamet:
-        text_gamet['MT OBSC:'] = transmitter_hour(text_gamet['MT OBSC:'], numbers_dict)
+        # расшифровка 'MT OBSC:'
+        if 'MT OBSC:' in text_gamet:
+            text_gamet['MT OBSC:'] = transmitter_hour(text_gamet['MT OBSC:'], numbers_dict)
 
-    # Восстанавливаем весь текст с сохранением порядка и структуры
-    final_text = ''
-    for key, value in text_gamet.items():
-        #final_text += f"{key}\n{value.strip()}\n"
-        final_text += f"\n{value.strip()}\n"
+        # Восстанавливаем весь текст с сохранением порядка и структуры
+        final_text = ''
+        for key, value in text_gamet.items():
+            #final_text += f"{key}\n{value.strip()}\n"
+            final_text += f"\n{value.strip()}\n"
 
-    #final_text = remove_patterns2(final_text)
-    final_text = replace_text_with_dictionary(final_text, my_dict_abbreviations_and_endings)
-    final_text = replace_text_with_dictionary(final_text, my_dict_weather)
-    final_text = replace_digits_with_words(final_text).replace('  ', ' ')
-    final_text = re.sub(r'[a-zA-Z]', '', final_text)
-    result = [f'{final_text}']
-    list_list, name_list = process_text_list(result)
+        #final_text = remove_patterns2(final_text)
+        final_text = replace_text_with_dictionary(final_text, my_dict_abbreviations_and_endings)
+        final_text = replace_text_with_dictionary(final_text, my_dict_weather)
+        final_text = replace_digits_with_words(final_text).replace('  ', ' ')
+        final_text = re.sub(r'[a-zA-Z]', '', final_text)
 
-    # Расстановка ударений и тегов для нейросети
-    processed_texts = process_and_transform_text(list_list, '../dictionaries/orphoepy.db')
-    print(*processed_texts)
-    path_to_project = os.path.dirname(os.path.abspath(__file__)) + '\\'
-    # final_text = replace_words_in_text_in_db(final_text, '../dictionaries/orphoepy.db')
-    # final_text = process_text_3(final_text)
-
-    utils.clear_folder('audio/audio_file')
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = torch.package.PackageImporter('modelV3.pt').load_pickle("tts_models", "model")
-    model.to(device)
-    for i, j in zip(processed_texts, name_list):
-        model_transform(i, j, path_to_project)
+        return final_text

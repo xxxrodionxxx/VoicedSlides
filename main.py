@@ -5,13 +5,14 @@ from video import video_processing
 from art import text2art
 
 
+
 def main():
     # Начало измерения времени vv
 
     start_time = time.time()
     path_to_project = os.path.dirname(os.path.abspath(__file__)) + '\\'
     # Читаем конфигурационный файл
-    codec, scale_width, scale_height, num_threads, name_model = read_config('config.ini')
+    codec, scale_width, scale_height, num_threads, name_model, flag_gamet = read_config('config.ini')
 
     # Проверка и создание папок
     check_and_create_folder('input')
@@ -27,7 +28,7 @@ def main():
 
     # Преобразование текста в аудиофайлы
 
-    processed_texts, name_list = text_processing.main(file_path_docx)
+    processed_texts, name_list = text_processing.main(file_path_docx, flag_gamet=flag_gamet)
     print(processed_texts, name_list)
 
     # Преобразование текста в аудиофайлы

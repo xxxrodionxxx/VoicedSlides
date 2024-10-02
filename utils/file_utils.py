@@ -57,7 +57,8 @@ def read_config(name_file: str) -> object:
     scale_height = int(config['Video']['ScaleHeight'])
     num_threads = int(config['Model']['NumThreads'])
     name_model = config['Model']['NameModel']
-    return codec, scale_width, scale_height, num_threads, name_model
+    flag_gamet = bool(config['GAMET']['gamet'])
+    return codec, scale_width, scale_height, num_threads, name_model, flag_gamet
 
 
 def find_docx_and_pptm_files(folder_path):
