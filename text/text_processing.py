@@ -345,7 +345,6 @@ def main(file_path_docx, flag_gamet=False):
     else:
         start_text = split_text(text_consultations, '!START!', '!GAMET_ONE_START!')
         end_text = split_text(text_consultations, '!TAF_END!', '!END!')
-        print(end_text)
         taf_and_gamet_text = split_text(text_consultations, '!GAMET_ONE_START!', '!TAF_END!')
         # Преобразуем текст в формат TAF в текст
         taf_and_gamet_text = manipulate_text(taf_and_gamet_text, '!TAF_START!', '!TAF_END!', transmitter_taf)
