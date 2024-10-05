@@ -3,7 +3,10 @@ from audio import audio_processing
 from utils.file_utils import *
 from video import video_processing
 from art import text2art
-
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+import sys
+# Импортируем сгенерированный класс (замените на правильное имя класса)
+from ui import Ui_Dialog
 
 
 def main():
