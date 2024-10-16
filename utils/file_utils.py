@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 import win32com.client
+from pathlib import Path
 
 
 def remove_file(pat_to_file_remove):
@@ -145,3 +146,7 @@ def rename_file(folder, old_name, new_name):
 
     except Exception as e:
         print(f"Общая ошибка при переименовании файла: {e}")
+
+def check_path(path_string):
+    path = Path(path_string)
+    return path.exists() and not path.is_dir() and path.stat().st_size > 0

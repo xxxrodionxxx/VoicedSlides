@@ -54,26 +54,26 @@ def cloud(text):
     for match in matches_bkn:
         cloud_data = int(match.group(1))
         cloud_data2 = int(match.group(2))
-        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей {cloud_data2} метр.'
+        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей {cloud_data2} метр. '
         text = re.sub(re.escape(match.group(0)), replacement, text)
 
     matches_ovc = re.finditer(r'TCU (\d{3})/(\d{4}) M AGL', text)
     for match in matches_ovc:
         cloud_data = int(match.group(1))
         cloud_data2 = int(match.group(2))
-        replacement = f'м+ощно к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей {cloud_data2} метр.'
+        replacement = f'м+ощно к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей {cloud_data2} метр. '
         text = re.sub(re.escape(match.group(0)), replacement, text)
 
     matches_ovc = re.finditer(r'CB (\d{3})/XXX M AGL', text)
     for match in matches_ovc:
         cloud_data = int(match.group(1))
-        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей в+ыше эшел+она 100'
+        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей в+ыше эшел+она 100 '
         text = re.sub(re.escape(match.group(0)), replacement, text)
 
     matches_ovc = re.finditer(r'TCU (\d{3})/XXX M AGL', text)
     for match in matches_ovc:
         cloud_data = int(match.group(1))
-        replacement = f'м+ощно к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей в+ыше эшел+она 100'
+        replacement = f'м+ощно к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей в+ыше эшел+она 100 '
         text = re.sub(re.escape(match.group(0)), replacement, text)
     return text
 
@@ -82,14 +82,14 @@ def cloud2(text):
     matches_bkn = re.finditer(r'(\d{4})/(\d{4}) M AMSL', text)
     for match in matches_bkn:
         cloud_data = int(match.group(1))
-        replacement = f'с н+ижней гран+ицей {cloud_data} метр. от +уровня м+оря'
+        replacement = f'с н+ижней гран+ицей {cloud_data} метр. от +уровня м+оря '
         text = re.sub(re.escape(match.group(0)), replacement, text)
 
     matches_bkn = re.finditer(r'CB (\d{4})/(\d{4}) M AMSL', text)
     for match in matches_bkn:
         cloud_data = int(match.group(1))
         cloud_data2 = int(match.group(2))
-        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей {cloud_data2} метр. от +уровня м+оря'
+        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей {cloud_data2} метр. от +уровня м+оря '
         text = re.sub(re.escape(match.group(0)), replacement, text)
 
     matches_ovc = re.finditer(r'TCU (\d{4})/(\d{4}) M AMSL', text)
@@ -102,7 +102,7 @@ def cloud2(text):
     matches_ovc = re.finditer(r'CB (\d{4})/XXX M AMSL', text)
     for match in matches_ovc:
         cloud_data = int(match.group(1))
-        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей в+ыше эшел+она 150 от +уровня м+оря'
+        replacement = f'к+учево дождев+ая с н+ижней гран+ицей {cloud_data} метр. и в+ерхней гран+ицей в+ыше эшел+она 150 от +уровня м+оря '
         text = re.sub(re.escape(match.group(0)), replacement, text)
 
     matches_ovc = re.finditer(r'TCU (\d{4})/XXX M AMSL', text)
@@ -240,19 +240,19 @@ def replace_fl(text):
 
 def remove_patterns(text):
     patterns = {
-        r'UNNT GAMET VALID': 'Прогн+оз Гам+ет',
-        r'UNNT GAMET AMD VALID': 'Коррект+ив к прогн+озу Гам+ет',
-        r'UNNT GAMET COR VALID': 'Исправл+ение к прогн+озу Гамет ',
-        r'UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100*': 'по площад+ям с п+ервой Аа Бэ, по дев+ятую ЦэПэ+И Т+омск, н+иже эшел+она ст+о',
-        r'SECN I': 'раздел од+ин',
-        r'SECN 1': 'раздел од+ин',
+        r'UNNT GAMET VALID': ' Прогн+оз Гам+ет',
+        r'UNNT GAMET AMD VALID': ' Коррект+ив к прогн+озу Гам+ет',
+        r'UNNT GAMET COR VALID': ' Исправл+ение к прогн+озу Гамет ',
+        r'UNNT NOVOSIBIRSK FIR/TOMSK 1AB-9 BLW FL100*': 'по площад+ям с п+ервой Аа Бэ, по дев+ятую ЦэПэ+И Т+омск, н+иже эшел+она ст+о ',
+        r'SECN I': ', раздел од+ин',
+        r'SECN 1': ', раздел од+ин',
         r'HAZARDOUS WX NIL': 'оп+асные явл+ения пог+оды отс+утствуют',
-        r'USTV TYUMEN FIR/NIZHNEVARTOVSK 1-11 BLW FL100*': 'по площад+ям с п+ервой по од+иннадцатую ЦэПэ+И Нижнев+артовск, н+иже эшелона ст+о',
-        r'USTV GAMET VALID': 'Прогн+оз Гам+ет',
-        r'USTV GAMET AMD VALID': 'Коррект+ив к прогн+озу Гам+ет',
-        r'USTV GAMET COR VALID': 'Исправл+ение к прогн+озу Гам+ет ',
+        r'USTV TYUMEN FIR/NIZHNEVARTOVSK 1-11 BLW FL100*': 'по площад+ям с п+ервой по од+иннадцатую ЦэПэ+И Нижнев+артовск, н+иже эшелона ст+о ',
+        r'USTV GAMET VALID': ' Прогн+оз Гам+ет',
+        r'USTV GAMET AMD VALID': ' Коррект+ив к прогн+озу Гам+ет',
+        r'USTV GAMET COR VALID': ' Исправл+ение к прогн+озу Гам+ет ',
         r'INC AND PRECIPITATION': 'в облак+ах и ос+адках',
-        r'UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150': 'по площад+ям с дес+ятой по чет+ырнадцатую Аа Бэ, ЦэПэ+И Т+омск, н+иже эшел+она 150',
+        r'UNNT NOVOSIBIRSK FIR/TOMSK 10 11 12 13 14AB BLW FL150': 'по площад+ям с дес+ятой по чет+ырнадцатую Аа Бэ, ЦэПэ+И Т+омск, н+иже эшел+она 150 ',
         r"VAL": "в дол+инах, в низ+инах",
         r"RIVERS": "над р+еками",
         r"VILLAGES": "над деревн+ями",

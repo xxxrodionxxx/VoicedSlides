@@ -112,6 +112,24 @@ def remove_tags(text):
 
     return text
 
+def remove_tags_2(text):
+    patterns = {
+        r'!TAF_START!': '',
+        r'!TAF_END!': '',
+        r'!START!': '',
+        r'!END!': '',
+        r'!GAMET_START!': '',
+        r'!GAMET_END!': '',
+        r'!GAMET_ONE_START!': '',
+        r'!GAMET_ONE_END!': '',
+        r'!GAMET_TWO_START!': '',
+        r'!GAMET_TWO_END!': '',
+    }
+
+    for pattern, replacement in patterns.items():
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+    return text
 
 def concatenate_texts(*texts):
     concatenated_text = ""
@@ -374,4 +392,4 @@ def main(file_path_docx, flag_gamet=False):
     # Расстановка ударений и тегов для нейросети
     processed_texts = process_and_transform_text(list_list, 'dictionaries\orphoepy.db')
 
-    return processed_texts, name_list
+    return processed_texts, name_list, list_list

@@ -1,13 +1,15 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+from ui import Ui_MainWindow
 
-# Импортируем сгенерированный класс (замените на правильное имя класса)
-from ui import Ui_Dialog
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.setupUi(self)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    Dialog = QDialog()
-    ui = Ui_Dialog()
-    ui.setupUi(Dialog)
-    Dialog.show()
+    window = MainWindow()
+    window.show()
     sys.exit(app.exec())
