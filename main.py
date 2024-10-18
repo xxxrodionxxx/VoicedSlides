@@ -48,7 +48,7 @@ def run_pro(progress_callback, progress_callback_edit, file_path_word, file_path
 
         # Создаём видеофайл из картинок и аудио
         progress_callback('Создаём видеофайл из картинок и аудио')
-        video_processing.video_creation('picture', 'audio/audio_file', file_path_ppt, codec)
+        video_processing.video_creation('picture', 'audio/audio_file', file_path_ppt, codec, False)
 
         # Вывод на экран времени затраченного на выполнение скрипта
         end_time = time.time()
@@ -110,7 +110,7 @@ def main():
 
     # Создаём видеофайл из картинок и аудио
     print('Создаём видеофайл из картинок и аудио')
-    video_processing.video_creation('picture', 'audio/audio_file', file_path_pptx, codec)
+    video_processing.video_creation('picture', 'audio/audio_file', file_path_pptx, codec, True)
 
     # Вывод на экран времени затраченного на выполнение скрипта
     end_time = time.time()

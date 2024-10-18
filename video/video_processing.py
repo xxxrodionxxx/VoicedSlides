@@ -3,7 +3,7 @@ from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 import multiprocessing
 
 
-def video_creation(path_image: str, path_audio: str, file_path_pptx: str, codec: str):
+def video_creation(path_image: str, path_audio: str, file_path_pptx: str, codec: str, verbose: bool):
     # Список файлов изображений
     image_files = sorted(os.listdir(path_image), key=lambda x: int(x.split('_')[1][:-4]))
 
@@ -37,6 +37,8 @@ def video_creation(path_image: str, path_audio: str, file_path_pptx: str, codec:
         fps=24,
         threads=num_threads,  # Используем все доступные ядра
         preset='medium',  # Баланс между скоростью и качеством
+        verbose=verbose,  # Отключаем вывод информации о процессе
+        logger=None  # Отключаем вывод логов
         # bitrate='5000k',  # Установите подходящий битрейт
         # audio_bitrate='192k'
     )
