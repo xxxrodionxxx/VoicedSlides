@@ -116,7 +116,7 @@ model = torch.package.PackageImporter('modelV3.pt').load_pickle("tts_models", "m
 model.to(device)
 
 
-def convert_texts_to_audio(processed_texts, name_list, path_to_project, num_threads=8):
+def convert_texts_to_audio(processed_texts, name_list, path_to_project, num_threads=4):
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
         futures = [executor.submit(model_transform, text, name, path_to_project)
                    for text, name in zip(processed_texts, name_list)]

@@ -1,10 +1,9 @@
 from text import text_processing, remove_tags_2
 from audio import audio_processing
 from utils.file_utils import *
-from video import video_processing
+from video import video_processing, video_ffmpeg
 from pathlib import Path
 from art import text2art
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 
 
 def run_pro(progress_callback, progress_callback_edit, file_path_word, file_path_ppt):
@@ -48,16 +47,13 @@ def run_pro(progress_callback, progress_callback_edit, file_path_word, file_path
 
         # Создаём видеофайл из картинок и аудио
         progress_callback('Создаём видеофайл из картинок и аудио')
-        video_processing.video_creation('picture', 'audio/audio_file', file_path_ppt, codec, False)
-
+        # video_processing.video_creation_without_statusbar('picture', 'audio/audio_file', file_path_ppt, codec)
+        video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_ppt, codec)
         # Вывод на экран времени затраченного на выполнение скрипта
         end_time = time.time()
         execution_time = end_time - start_time
         message = "T h e   E n d ! ! !"
         progress_callback('Время затраченное на выполнение скрипта: ' + '  ' + f'{execution_time:.2f}'+ ' сек.')
-
-        # ascii_art = text2art(message, font='starwars')  # Используйте 'doom' шрифт
-        # progress_callback(ascii_art)
     else:
         progress_callback('Выберите пути до файлов!')
 
@@ -80,25 +76,14 @@ def main():
     # Конвертация PowerPoint в PNG изображения
     print('Конвертация PowerPoint в PNG изображения')
     file_path_docx, file_path_pptx = find_docx_and_pptm_files('input')
-    # file_path_ppt = Path(file_path_ppt)
-    # file_path_word = Path(file_path_word)
     file_path_docx = Path(file_path_docx)
     file_path_pptx = Path(file_path_pptx)
-    # print(file_path_ppt)
-    # print(file_path_word)
-    # print(path_to_project, file_path_docx)
-    # print(path_to_project, file_path_pptx)
     clear_folder('picture')
     convert_ppt_to_png(path_to_project / file_path_pptx, path_to_project + 'picture\\', scale_width, scale_height)
 
 
 
     processed_texts, name_list, text_consultations = text_processing.main(file_path_docx, flag_gamet=flag_gamet)
-    # for i in text_consultations:
-    #     progress_callback_edit(i.replace('\n', ' '))
-    # for i in text_consultations:
-    #     progress_callback_edit(i)
-    # print(processed_texts, name_list)
 
     # Преобразование текста в аудиофайлы
     print('Преобразование текста в аудиофайлы')
@@ -110,14 +95,14 @@ def main():
 
     # Создаём видеофайл из картинок и аудио
     print('Создаём видеофайл из картинок и аудио')
-    video_processing.video_creation('picture', 'audio/audio_file', file_path_pptx, codec, True)
-
+    video_processing.video_creation_with_statusbar('picture', 'audio/audio_file', file_path_pptx, codec)
+    # video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_pptx, codec)
     # Вывод на экран времени затраченного на выполнение скрипта
     end_time = time.time()
     execution_time = end_time - start_time
     message = "T h e   E n d ! ! !"
     print('Время затраченное на выполнение скрипта: ' + '  ' + f'{execution_time:.2f}'+ ' сек.')
     ascii_art = text2art(message, font='starwars')  # Используйте 'doom' шрифт
-
+    print(ascii_art)
 if __name__ == '__main__':
     main()
