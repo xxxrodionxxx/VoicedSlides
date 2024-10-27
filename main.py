@@ -95,8 +95,8 @@ def main():
 
     # Создаём видеофайл из картинок и аудио
     print('Создаём видеофайл из картинок и аудио')
-    video_processing.video_creation_with_statusbar('picture', 'audio/audio_file', file_path_pptx, codec)
-    # video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_pptx, codec)
+    # video_processing.video_creation_with_statusbar('picture', 'audio/audio_file', file_path_pptx, codec)
+    video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_pptx, codec)
     # Вывод на экран времени затраченного на выполнение скрипта
     end_time = time.time()
     execution_time = end_time - start_time
