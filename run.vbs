@@ -1,0 +1,2 @@
+Set WshShell = CreateObject("WScript.Shell")
+WshShell.Run """F:\Program Files (x86)\Projects\VoicedSlides\venv\Scripts\pythonw.exe"" ""F:\Program Files (x86)\Projects\VoicedSlides\main_ui_pyside6.py""", 0

@@ -353,7 +353,8 @@ def cloud3(text):
 def transmitter_taf(text):
     text = text.replace('!TAF_START!', '')
     text = text.replace('!TAF_END!', '')
-    text = text.replace('\n', '')
+    text = text.replace('\n', ' ')
+    text = text.replace('=', '')
     my_dict = load_dictionary(r'./dictionaries/dict_weather.txt')
 
     start_text_end = process_and_replace(text, numbers_dict)

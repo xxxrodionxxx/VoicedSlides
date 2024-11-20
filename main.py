@@ -28,32 +28,40 @@ def run_pro(progress_callback, progress_callback_edit, file_path_word, file_path
         progress_callback('Конвертация PowerPoint в PNG изображения')
         file_path_ppt = Path(file_path_ppt)
         file_path_word = Path(file_path_word)
-
         clear_folder('picture')
-        convert_ppt_to_png(file_path_ppt, path_to_project + 'picture\\', scale_width, scale_height)
 
-        processed_texts, name_list, text_consultations = text_processing.main(file_path_word, flag_gamet=flag_gamet)
-        for i in text_consultations:
-            i = remove_tags_2(i)
-            progress_callback_edit('       ' + i.replace('\n', ' '))
+        list_tags = ['!TAF_START!', '!TAF_END!', '!START!', '!END!']
+        count_teg = find_tags(file_path_word)
 
-        # Преобразование текста в аудиофайлы
-        progress_callback('Преобразование текста в аудиофайлы')
-        # audio_processing.convert_texts_to_audio(processed_texts, name_model, name_list, path_to_project, num_threads)
-        audio_paths = audio_processing.convert_texts_to_audio(processed_texts, name_list, path_to_project)
+        if checking_teg(file_path_word, list_tags):
+            if count_teg == convert_ppt_to_png(file_path_ppt, path_to_project + 'picture\\', scale_width, scale_height):
 
-        # Объединение аудио-файлов
-        audio_processing.serch_and_concatenate_wav(path_to_project + 'audio/audio_file')
+                processed_texts, name_list, text_consultations = text_processing.main(file_path_word, flag_gamet=flag_gamet)
+                for i in text_consultations:
+                    i = remove_tags_2(i)
+                    progress_callback_edit('       ' + i.replace('\n', ' '))
 
-        # Создаём видеофайл из картинок и аудио
-        progress_callback('Создаём видеофайл из картинок и аудио')
-        # video_processing.video_creation_without_statusbar('picture', 'audio/audio_file', file_path_ppt, codec)
-        video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_ppt, codec)
-        # Вывод на экран времени затраченного на выполнение скрипта
-        end_time = time.time()
-        execution_time = end_time - start_time
-        message = "T h e   E n d ! ! !"
-        progress_callback('Время затраченное на выполнение скрипта: ' + '  ' + f'{execution_time:.2f}'+ ' сек.')
+                # Преобразование текста в аудиофайлы
+                progress_callback('Преобразование текста в аудиофайлы')
+                # audio_processing.convert_texts_to_audio(processed_texts, name_model, name_list, path_to_project, num_threads)
+                audio_paths = audio_processing.convert_texts_to_audio(processed_texts, name_list, path_to_project)
+
+                # Объединение аудио-файлов
+                audio_processing.serch_and_concatenate_wav(path_to_project + 'audio/audio_file')
+
+                # Создаём видеофайл из картинок и аудио
+                progress_callback('Создаём видеофайл из картинок и аудио')
+                # video_processing.video_creation_without_statusbar('picture', 'audio/audio_file', file_path_ppt, codec)
+                video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_ppt, codec)
+                # Вывод на экран времени затраченного на выполнение скрипта
+                end_time = time.time()
+                execution_time = end_time - start_time
+                message = "T h e   E n d ! ! !"
+                progress_callback('Время затраченное на выполнение скрипта: ' + '  ' + f'{execution_time:.2f}'+ ' сек.')
+            else:
+                progress_callback("Ошибка: Количество тегов в тексте не соответствует количеству слайдов в презентации")
+        else:
+            progress_callback(f'Ошибка: Отсутствует один из тегов: { " или ".join(list_tags)}')
     else:
         progress_callback('Выберите пути до файлов!')
 
@@ -79,30 +87,38 @@ def main():
     file_path_docx = Path(file_path_docx)
     file_path_pptx = Path(file_path_pptx)
     clear_folder('picture')
-    convert_ppt_to_png(path_to_project / file_path_pptx, path_to_project + 'picture\\', scale_width, scale_height)
 
+    list_tags = ['!TAF_START!', '!TAF_END!', '!START!', '!END!']
+    count_teg = find_tags(file_path_docx)
 
+    if checking_teg(file_path_docx, list_tags):
+        if count_teg == convert_ppt_to_png(path_to_project / file_path_pptx, path_to_project + 'picture\\', scale_width, scale_height):
+    # convert_ppt_to_png(path_to_project / file_path_pptx, path_to_project + 'picture\\', scale_width, scale_height)
 
-    processed_texts, name_list, text_consultations = text_processing.main(file_path_docx, flag_gamet=flag_gamet)
+            processed_texts, name_list, text_consultations = text_processing.main(file_path_docx, flag_gamet=flag_gamet)
 
-    # Преобразование текста в аудиофайлы
-    print('Преобразование текста в аудиофайлы')
-    # audio_processing.convert_texts_to_audio(processed_texts, name_model, name_list, path_to_project, num_threads)
-    audio_paths = audio_processing.convert_texts_to_audio(processed_texts, name_list, path_to_project)
+            # Преобразование текста в аудиофайлы
+            print('Преобразование текста в аудиофайлы')
+            # audio_processing.convert_texts_to_audio(processed_texts, name_model, name_list, path_to_project, num_threads)
+            audio_paths = audio_processing.convert_texts_to_audio(processed_texts, name_list, path_to_project)
 
-    # Объединение аудио-файлов
-    audio_processing.serch_and_concatenate_wav(path_to_project + 'audio/audio_file')
+            # Объединение аудио-файлов
+            audio_processing.serch_and_concatenate_wav(path_to_project + 'audio/audio_file')
 
-    # Создаём видеофайл из картинок и аудио
-    print('Создаём видеофайл из картинок и аудио')
-    # video_processing.video_creation_with_statusbar('picture', 'audio/audio_file', file_path_pptx, codec)
-    video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_pptx, codec)
-    # Вывод на экран времени затраченного на выполнение скрипта
-    end_time = time.time()
-    execution_time = end_time - start_time
-    message = "T h e   E n d ! ! !"
-    print('Время затраченное на выполнение скрипта: ' + '  ' + f'{execution_time:.2f}'+ ' сек.')
-    ascii_art = text2art(message, font='starwars')  # Используйте 'doom' шрифт
-    print(ascii_art)
+            # Создаём видеофайл из картинок и аудио
+            print('Создаём видеофайл из картинок и аудио')
+            # video_processing.video_creation_with_statusbar('picture', 'audio/audio_file', file_path_pptx, codec)
+            video_ffmpeg.video_creation_with_statusbar_ffmpeg('picture', 'audio/audio_file', file_path_pptx, codec)
+            # Вывод на экран времени затраченного на выполнение скрипта
+            end_time = time.time()
+            execution_time = end_time - start_time
+            message = "T h e   E n d ! ! !"
+            print('Время затраченное на выполнение скрипта: ' + '  ' + f'{execution_time:.2f}'+ ' сек.')
+            ascii_art = text2art(message, font='starwars')  # Используйте 'doom' шрифт
+            print(ascii_art)
+        else:
+            print("Ошибка: Количество тегов в тексте не соответствует количеству слайдов в презентации")
+    else:
+        print(f'Ошибка: Отсутствует один из тегов: {" или ".join(list_tags)}')
 if __name__ == '__main__':
     main()

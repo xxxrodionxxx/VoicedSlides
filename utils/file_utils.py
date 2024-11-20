@@ -2,6 +2,9 @@ import configparser
 import os
 import shutil
 import time
+import re
+
+import textract
 import win32com.client
 from pathlib import Path
 
@@ -101,6 +104,7 @@ def convert_ppt_to_png(ppt_file, output_folder, scale_width=960, scale_height=54
     try:
         print('Создаем объект PowerPoint')
         # Создаем объект PowerPoint
+        count_slides = set()
         powerpoint = win32com.client.Dispatch("PowerPoint.Application")
         powerpoint.Visible = True  # Сделать PowerPoint видимым, если нужно для отладки
 
@@ -112,6 +116,7 @@ def convert_ppt_to_png(ppt_file, output_folder, scale_width=960, scale_height=54
             # Создаем файл изображения .png для каждого слайда
             image_path = os.path.join(output_folder, f"slide_{i + 1}.png")
             slide.Export(image_path, "PNG", ScaleWidth=scale_width, ScaleHeight=scale_height)
+            count_slides.add(i + 1)
             print(f'Слайд {i + 1} экспортирован как PNG')
 
         # Небольшая пауза перед закрытием PowerPoint
@@ -120,6 +125,7 @@ def convert_ppt_to_png(ppt_file, output_folder, scale_width=960, scale_height=54
         presentation.Close()
         powerpoint.Quit()
         print('Конвертация завершена успешно')
+        return count_slides
     except Exception as e:
         print(f"Произошла ошибка при конвертации: {e}")
         if 'powerpoint' in locals():
@@ -150,3 +156,36 @@ def rename_file(folder, old_name, new_name):
 def check_path(path_string):
     path = Path(path_string)
     return path.exists() and not path.is_dir() and path.stat().st_size > 0
+
+
+def checking_teg(path, list_teg) -> bool:
+    """Проверка наличия тегов в тексте
+
+    path: путь к файлу
+    list_teg: список с тегами
+    """
+    try:
+        # Извлечение текста из файла
+        docx_text = textract.process(path)
+        # Декодирование текста в строку
+        text = docx_text.decode("utf-8")
+    except Exception as e:
+        print(f"Ошибка при чтении файла: {e}")
+        return False
+
+    # Проверка наличия всех тегов в тексте
+    return all(teg in text for teg in list_teg)
+
+def find_tags(path):
+    """Находит теги в формате <число> и возвращает их в виде множества целых чисел.
+
+    text: путь к файлу docx
+    """
+    # Извлечение текста из файла
+    docx_text = textract.process(path)
+    # Декодирование текста в строку
+    text = docx_text.decode("utf-8")
+    # Используем регулярное выражение для поиска чисел внутри угловых скобок
+    tags = re.findall(r'<(\d+)>', text)
+    # Преобразуем найденные строки в целые числа и возвращаем в виде множества
+    return set(map(int, tags))

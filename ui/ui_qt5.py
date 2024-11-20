@@ -145,7 +145,7 @@ class Ui_MainWindow(object):
             self.label_2.setText("Файл не выбран")
 
     def open_folder(self):
-        folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')  # Замените на путь к нужной папке
+        folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__))[:-3], 'output')  # Замените на путь к нужной папке
         if os.path.exists(folder_path):
             os.startfile(folder_path)
         else:

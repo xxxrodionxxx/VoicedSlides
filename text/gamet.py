@@ -513,7 +513,7 @@ def process_gamet_text(text_gamet: str) -> str:
             text_gamet['SFC WIND:'] = replace_wind_vrb(text_gamet['SFC WIND:'])
             text_gamet['SFC WIND:'] = replace_wind_with_impulses(text_gamet['SFC WIND:'])
             text_gamet['SFC WIND:'] = replace_wind_without_impulses(text_gamet['SFC WIND:'])
-            text_gamet['SFC WIND:'] = 'Приз+емный в+етер: ' + text_gamet['SFC WIND:']
+            text_gamet['SFC WIND:'] = text_gamet['SFC WIND:'] # 'Приз+емный в+етер: ' +
 
         # расшифровка 'SFC VIS:'
         if 'SFC VIS:' in text_gamet:
@@ -522,7 +522,7 @@ def process_gamet_text(text_gamet: str) -> str:
             text_gamet['SFC VIS:'] = visibility_sigmet(text_gamet['SFC VIS:'])
             text_gamet['SFC VIS:'] = transmitter_hour(text_gamet['SFC VIS:'], numbers_dict)
             text_gamet['SFC VIS:'] = transmitter_hour_minute(text_gamet['SFC VIS:'], numbers_dict)
-            text_gamet['SFC VIS:'] = 'В+идимость у пов+ерхности земл+и: ' + text_gamet['SFC VIS:']
+            text_gamet['SFC VIS:'] = text_gamet['SFC VIS:'] # 'В+идимость у пов+ерхности земл+и: ' +
 
 
         # расшифровка 'SIGWX:'
